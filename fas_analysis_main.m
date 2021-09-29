@@ -1,65 +1,43 @@
 %% FAS analysis main
 %   main script for fiber aligned strain & strain rate analysis
+
 %load('Results.mat')
 
-%% Strain (St) & Strain Rate (SR) colormaps
-
-% generate colormaps
-source = 'SR'; %strain data source
-ev_labels = ["x1","x2","x3";"y1","y2","y3";"z1","z2","z3"];
-for n = 1%:length(Data)
-    % trim ev matrix
-    data = squeeze(Data(n).strain.SR_vector); % change strain data source
+% cycle through eigenvector numbers, v
+for v = 1:3
     
-    % create colormaps
-    num_frs = size(data,3);
-    pct_mvc = char(Data(n).MVC);
-    for fr = 1:num_frs
-        name = sprintf('%s %s%% MVC Frame %d of %d', source, pct_mvc, fr, num_frs);
-        ev_colormap(squeeze(data(:,:,fr,:,:)), ev_labels, name)
+    % record strain data used
+    strain_name = sprintf('SR_vector EV%d',v);
+    
+    % get masks for middle slice (#2)
+    masks = squeeze(Data(1).mask(:,:,2,:));
+    
+    for fr = 17:-1:1
+        % assumes eigen vector matrix is:
+        %   x1   x2   x3
+        %   y1   y2   y3
+        %   z1   z2   z3
+        
+        % select single frame, fr, and desired eigenvector, v
+        ev = squeeze(Data(1).strain.SR_vector(:,:,:,fr,:,v));
+        
+        % transform image frame coordinates to scanner frame coordinates
+        ev = ev(:,:,[3 1 2]);
+        
+        ev = abs(ev);
+        for c = 1:3
+            ev(:,:,c) = ev(:,:,c) .* masks(:,:,fr);
+            ev(:,:,c) = rescale(ev(:,:,c)); % rescale color intensity [0,1]
+        end
+        
+        % collect all colormap image frames
+        all_frs(:,:,:,fr) = ev;
+        
     end
-end
-
-% organize images
-mkdir(source)
-movefile('*.png',source)
-
-%% functions
-function ev_colormap(evs, labels, name)
-% expects eigenvectors (evs) matrix as [pix, pix, 3 vectors, 3 directions]
-% assumes eigen vector matrix is:
-%   x1   x2   x3
-%   y1   y2   y3
-%   z1   z2   z3
-% but montage function plots as:
-%   1    2    3
-%   4    5    6
-%   7    8    9
-% ev order is therefore altered so that the montage image matches the ev 
-% matrix convention
-
-% plot colormap montage
-evs = abs(evs(:,:,:));
-evs = evs(:,:,[1 4 7 2 5 8 3 6 9]); % change ev order so montage matches matrix
-montage(evs, 'ThumbnailSize', [])
-colormap('jet')
-colorbar
-
-% add text labels
-npix = size(evs, 1);
-x = npix .* [0:2] + 3;
-y = npix .* [1:3] - 9;
-x = x([1 1 1 2 2 2 3 3 3]);
-y = y([1 2 3 1 2 3 1 2 3]);
-labels = labels(:);
-for k = 1:9
-    text(x(k), y(k), labels(k), 'Color', 'w')
-end
-title(name)
-
-% save figure
-filename = [name,'.png'];
-exportgraphics(gcf, filename)
-close
-
+    
+    %display and save colormaps images
+    figure('Name',strain_name)
+    montage(all_frs, 'Size',[3 6], 'ThumbnailSize',[])
+    exportgraphics(gcf,[strain_name,'.png'])
+    close
 end
