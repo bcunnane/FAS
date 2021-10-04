@@ -25,12 +25,13 @@ for v = 1:3
         ev = ev(:,:,[3 1 2]);
         
         ev = abs(ev);
+        
+        % apply mask to each color
         for c = 1:3
             ev(:,:,c) = ev(:,:,c) .* masks(:,:,fr);
-            ev(:,:,c) = rescale(ev(:,:,c)); % rescale color intensity [0,1]
         end
         
-        % collect all colormap image frames
+        % collect all colormap image frames into single matrix
         all_frs(:,:,:,fr) = ev;
         
     end
