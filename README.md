@@ -18,7 +18,7 @@ Blue  - superior to inferior
 > Strain Rate in MG eigenvector 1 for 30% MVC muscle exertion
 
 
-![DTI eigenvectors corresponding to muscle fiber direction](images/DTI EV123.png)
+![DTI eigenvectors 1,2, & 3 representing muscle fiber direction. Primary eigenvector is #3.](images/DTI EV123.png)
 > DTI eigenvectors corresponding to muscle fiber direction
 
 ### Projecting strain in the direction of the muscle fibers
