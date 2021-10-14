@@ -12,10 +12,10 @@ Green - anterior to posterior
 Blue  - superior to inferior
 
 ![Strain in MG eigenvector 1 for 30% MVC muscle exertion](images/L MG 30% MVC EV1.png)
-> Strain in MG eigenvector 1 for 30% MVC muscle exertion
+> Strain in MG eigenvector 1 for 30% MVC muscle exertion for the 17 dynamic frames
 
 ![Strain Rate in MG eigenvector 1 for 30% MVC muscle exertion](images/SR MG 30% MVC EV1.png)
-> Strain Rate in MG eigenvector 1 for 30% MVC muscle exertion
+> Strain Rate in MG eigenvector 1 for 30% MVC muscle exertion for the 17 dynamic frames
 
 
 ![DTI eigenvectors 1, 2, & 3 representing muscle fiber direction. Primary eigenvector is #3.](images/DTI EV123.png)
