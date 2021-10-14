@@ -1,7 +1,7 @@
 [Home](https://bcunnane.github.io/)  
 [View Code](https://github.com/bcunnane/FAS)
 
-This project utilizes strain and strain rate data collected in the medial gastrocnemius (MG) muscle and seeks to align them in the direction of the muscle fibers as deterined by diffusion tensor imaging (DTI). Strain and strain rate data were collected for 60%, 40%, and 30% of the subject's maximum voluntary contraction (MVC).
+This project utilizes strain and strain rate data collected in the medial gastrocnemius (MG) muscle and seeks to align them in the direction of the muscle fibers as determined by diffusion tensor imaging (DTI). Strain and strain rate data were collected for 60%, 40%, and 30% of the subject's maximum voluntary contraction (MVC).
 
 ### Visualizing strain, strain rate, and muscle fiber direction.
 
