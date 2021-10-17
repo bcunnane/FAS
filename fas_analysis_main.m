@@ -5,61 +5,60 @@
 pcts = ["60","40","30"];
 
 %% get muscle ROI outlines
-series = 3;
+series = 2;
 
-% mag_ims = squeeze(Data(series).m(:,:,2,:)); %first frame mag im for middle slice (#2)
-% 
-% disp('ID mg')
-% mg_roi = get_roi(mag_ims(:,:,8));
-% 
-% disp('ID sol')
-% sol_roi = get_roi(mag_ims(:,:,8));
+mag_ims = squeeze(Data(series).m(:,:,2,:)); %first frame mag im for middle slice (#2)
+
+disp('ID mg')
+mg_roi = get_roi(mag_ims(:,:,8));
+
+disp('ID sol')
+sol_roi = get_roi(mag_ims(:,:,8));
 %% Strain & strain rate Eigenvector (ev) colormaps
-for v = 1
+for v = 1:3
+%     % arrange ev data for plotting
+%     ev = squeeze(Data(series).strain.SR_vector(:,:,:,:,:,v)); % select ev
+%     ev = permute(ev,[1,2,4,3]); % [pix pix rgb frames]
+%     ev = ev(:,:,[3 1 2],:); %set rgb to zxy
+%     ev = abs(ev);
+%     
+%     mg_cmaps = ev_colormaps(ev, mg_roi, mag_ims);
+%     sol_cmaps = ev_colormaps(ev, sol_roi, mag_ims);
+%     
+%     %display
+%     montage(mg_cmaps, 'Size',[3 6], 'ThumbnailSize',[])
+%     exportgraphics(gcf,['SR MG ',char(pcts(series)),'% MVC EV',num2str(v),'.png'])
+%     close
+%     
+%     montage(sol_cmaps, 'Size',[3 6], 'ThumbnailSize',[])
+%     exportgraphics(gcf,['SR SOL ',char(pcts(series)),'% MVC EV',num2str(v),'.png'])
+%     close
+end
+%% DTI colormaps
+all_dti_evs = [];
+mag = mag_ims(:,:,1);
+for v = 3:-1:1
     % arrange ev data for plotting
-    ev = squeeze(Data(series).strain.L_vector(:,:,:,:,:,v)); % select ev
-    ev = permute(ev,[1,2,4,3]); % [pix pix rgb frames]
+    ev = squeeze(Data(series).dti_vec(:,:,2,:,v)); % select ev
     ev = ev(:,:,[3 1 2],:); %set rgb to zxy
     ev = abs(ev);
-    
-    mg_cmaps = strain_ev_colormaps(ev, mg_roi, mag_ims);
-    sol_cmaps = strain_ev_colormaps(ev, sol_roi, mag_ims);
-    
-    %display
-    montage(mg_cmaps, 'Size',[3 6], 'ThumbnailSize',[])
-    exportgraphics(gcf,['L MG ',char(pcts(series)),'% MVC EV',num2str(v),'.png'])
-    close
-    
-    montage(sol_cmaps, 'Size',[3 6], 'ThumbnailSize',[])
-    exportgraphics(gcf,['L SOL ',char(pcts(series)),'% MVC EV',num2str(v),'.png'])
-    close
+    all_dti_evs(:,:,:,v) = ev;
 end
-%% investigate force
 
-% figure
-% for series = 1:3
-%     lambdas = squeeze(Data(series).strain.L_lambda);
-%     lambdas = permute(lambdas,[1,2,4,3]);
-%     lambdas = lambdas(:,:,[3 1 2],:);
-%     
-%     subplot(2,2,series)
-%     force_plot(lambdas, mg_roi, Data(series).force)
-%     title(['\color{white} MG ',char(pcts(series)),'% MVC'])
-%     
-% end
-
+%display
+montage(all_dti_evs, 'Size',[1 3], 'ThumbnailSize',[])
+exportgraphics(gcf,'DTI EV123.png')
+close
 %% Functions
-function cmaps = strain_ev_colormaps(ev,roi,mag_ims)
+function cmaps = ev_colormaps(ev,roi,mag_ims)
 
 roi_mask = poly2mask(roi(:,1),roi(:,2),size(ev,1),size(ev,2));
-leg_masks = logical(mag_ims);
-
 
 for c = 1:3
-    for fr = 1:17
+    for fr = size(mag_ims,3):-1:1
         im = mag_ims(:,:,fr);
         im(roi_mask) = 0;
-        im = im + ev(:,:,c,fr) .* roi_mask .* leg_masks(:,:,fr);
+        im = im + (ev(:,:,c,fr) .* roi_mask);
         cmaps(:,:,c,fr) = im;
     end
 end
