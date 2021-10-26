@@ -1,91 +1,105 @@
 %% FAS analysis main
 % main script for fiber aligned strain & strain rate analysis
-%   selected slice is always #2 as it is in the center of the volume 
+%   selected slice is always #2 as it is in the center of the volume
+%   each main line is percent mvc; cycles through percent p
+%   each strain subline is strain (1) or strain rate (2); cycles through s
+%   there are 3 eigenvectors; cycles through v
+%   there are 17 frames; cycles through fr
 
-series = 2;
-pcts = ["60","40","30"];
-mag_ims = squeeze(Data(series).m(:,:,2,:));
-% mg_roi = get_roi(mag_ims(:,:,8));
-mg_mask = poly2mask(mg_roi(:,1),mg_roi(:,2),256,256);
+%% Startup
+q(:,:,1) = 'L ';
+q(:,:,2) = 'SR';
 
-%% Strain & strain rate Eigenvector (ev) colormaps
-for v = 1:3
-    % arrange ev data for plotting
-    ev = squeeze(Data(series).strain.SR_vector(:,:,:,:,:,v)); % select ev
-    ev = permute(ev,[1,2,4,3]); % [pix pix rgb frames]
-    ev = ev(:,:,[3 1 2],:); %set rgb to zxy
-    ev = abs(ev);
+dti_vecs = squeeze(Data(1).dti_vec(:,:,2,:,:));
+
+for p = 3:-1:1
+    data(p).name = ['MG ',char(Data(p).MVC), '% MVC'];
     
-    mg_cmaps = ev_colormaps(ev, mg_mask, mag_ims);
+    % setup image data
+    data(p).mag = squeeze(Data(p).m(:,:,2,:));
+    data(p).vx = squeeze(Data(p).vz(:,:,2,:));
+    data(p).vy = squeeze(Data(p).vx(:,:,2,:));
     
-    %display
-    montage(mg_cmaps, 'Size',[3 6], 'ThumbnailSize',[])
-    exportgraphics(gcf,['SR MG ',char(pcts(series)),'% MVC EV',num2str(v),'.png'])
-    close
+    % get ROI's
+    disp('Draw MG outline')
+    data(p).mg_masks = get_adaptive_masks(data(p).mag, data(p).vx, data(p).vy);
+    disp('Draw small square ROI outline in MG')
+    data(p).roi_masks = get_adaptive_masks(data(p).mag, data(p).vx, data(p).vy);
+    
+    % get strain data
+    data(p).tensors = {squeeze(Data(p).strain.L), squeeze(Data(p).strain.SR)};
+    data(p).evs = {squeeze(Data(p).strain.L_vector), squeeze(Data(p).strain.SR_vector)};
 end
 
-%% fiber aligned strain
-% change coordinates from xyz to zxy
-L = change_tensor_coords(Data(series).strain.L);
-SR = change_tensor_coords(Data(series).strain.SR);
+%% strain and DTI eigenvector (ev) colormaps
+% DTI colormaps, set rgb to zxy
+% montage(abs(dti_vecs(:,:,[3 1 2],:)), 'Size',[1 3], 'ThumbnailSize',[])
 
-% align to DTI fibers
-v = 3;
-dti_vec = squeeze(Data(series).dti_vec(:,:,2,:,v));
-dti_vec = dti_vec(:,:,[3 1 2]);
-for fr = 17:-1:1
-    E(:,:,fr) = align_to_fibers(squeeze(L(:,:,fr,:,:)), dti_vec);
-    E_mg(:,:,fr) = E(:,:,fr) .* mg_mask;
-end
-
-% for fr = 17:-1:1
-%     subplot(3,6,fr)
-%     edges = [-.5:.025:-.2];
-%     histogram(E_mg(E_mg~=0),edges)
+% Strain Colormaps
+% for p = 1:length(data)
+%     for s = 1:2
+%         ev = data(p).evs{s};
+%         for v = 1:3
+%             ev = squeeze(ev(:,:,:,:,v)); % select specific ev
+%             show_strain_ev_colormaps(ev, data(p).mag, data(p).mg_masks);
+%             exportgraphics(gcf,[data(p).name,' ',q(:,:,s),' EV',num2str(v),'.png'])
+%             close
+%         end
+%     end
 % end
-%% Functions
-
-function new_tensor = change_tensor_coords(old_tensor)
-
-old_tensor = squeeze(old_tensor);
-old_tensor = old_tensor(:,:,:,[9 7 8 3 1 2 6 4 5]); % set xyz to zxy
-new_tensor = reshape(old_tensor,256,256,17,3,3);
-
-end
-
-
-function E = align_to_fibers(F,v)
-
-FT = F(:,:,[1 4 7 2 5 8 3 6 9]); %transpose
-
-% reshape for matrix multiplication
-F = reshape(F,256*256,3,3);
-F = permute(F,[2 3 1]);
-
-FT = reshape(FT,256*256,3,3);
-FT = permute(FT,[2 3 1]);
-
-v = reshape(v,256*256,3,1);
-v = permute(v,[2 3 1]);
-
-% align strain in direction of vector
-C = pagemtimes(FT,F);
-Cv = pagemtimes(C,v);
-E = .5 * (sum(v .* Cv) - 1);
-E = reshape(E,256,256);
-
-end
-
-
-function cmaps = ev_colormaps(ev,roi_mask,mag_ims)
-
-for c = 1:3
-    for fr = size(mag_ims,3):-1:1
-        im = mag_ims(:,:,fr);
-        im(roi_mask) = 0;
-        im = im + (ev(:,:,c,fr) .* roi_mask);
-        cmaps(:,:,c,fr) = im;
+%% get fiber aligned strain
+for p = length(data):-1:1
+    for s = 2:-1:1
+        for v = 3:-1:1
+            dti_v = squeeze(dti_vecs(:,:,:,v));
+            for fr = 17:-1:1
+                E = squeeze(data(p).tensors{s}(:,:,fr,:,:));
+                Evv(:,:,fr) = get_fas(E, dti_v);
+            end
+            data(p).Evv{s,v} = Evv;
+        end
     end
 end
 
+%% get average fas
+for p = length(data):-1:1
+    for s = 2:-1:1
+        for v = 3:-1:1
+            [Evv_aves, Evv_stds] = get_ave_fas(data(p).Evv{s,v}, data(p).roi_masks);
+            data(p).Evv_aves{s,v} = Evv_aves;
+            data(p).Evv_stds{s,v} = Evv_stds;
+        end
+    end
 end
+
+%% get peak average fas
+for p = length(data):-1:1
+    for s = 1
+        [~,peak_frame] = max(data(p).Evv_aves{s,3});
+        for v = 3:-1:1
+            data(p).Evv_ave_peaks{s,v} = data(p).Evv_aves{s,v}(peak_frame);
+        end
+    end
+end
+
+%% show ave fas
+for p = 1:length(data)
+    for s = 1:2
+        plot_name = [data(p).name, ' ',q(:,:,s)];
+        show_ave_fas(data(p).Evv_aves(s,:), data(p).Evv_stds(s,:), data(p).mag, data(p).roi_masks, plot_name)
+        %exportgraphics(gcf,[plot_name,' ave in ROI.png'])
+    end
+end
+
+%% show fas on magnitude image
+for p = 1:length(data)
+    for s = 1:2
+        for v = 1:3
+            show_fas_colormaps(data(p).Evv{s,v}, data(p).mag, data(p).mg_masks)
+            exportgraphics(gcf,['colormap ',data(p).name,' ',q(:,:,s),' proj on EV',num2str(v),'.png'])
+            close
+        end
+    end
+end
+
+
