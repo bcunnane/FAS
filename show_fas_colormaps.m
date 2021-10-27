@@ -1,20 +1,16 @@
-function show_fas_colormaps(fas, mag_ims, masks)
-% displays fiber aligned strain as green color in ROI on magnitude images
+function show_fas_colormaps(fas, masks)
+% shows images in a 3x6 montage
 
-figure
+% rearange data as tiles instead of frames
+fas = imtile(fas,'GridSize', [3 6]);
+masks = imtile(masks,'GridSize', [3 6]);
 
-% remove masks from magnitude images
-mag_ims(masks) = 0;
-
-% convert magnitude and mask images to rgb format
-for fr = size(mag_ims,3):-1:1
-    rgb_ims(:,:,:,fr) = repmat(mag_ims(:,:,fr),[1 1 3]);
-end
-
-% add FAS colormap data within mask as green color in rgb format
-rgb_ims(:,:,2,:) = squeeze(rgb_ims(:,:,2,:)) + (fas .* masks);
-
-% display colormaps
-montage(rgb_ims, 'Size',[3 6], 'ThumbnailSize',[])
+% show fas data with colormap and make outside of mask transparent
+fas = fas .* masks;
+h_fas = imagesc(fas);
+h_fas.AlphaData = masks;
+colormap('jet')
+colorbar
+set(gca,'visible','off')
 
 end

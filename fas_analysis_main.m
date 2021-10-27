@@ -83,23 +83,22 @@ for p = length(data):-1:1
 end
 
 %% show ave fas
-for p = 1:length(data)
-    for s = 1:2
+for p = 2%1:length(data)
+    for s = 1%1:2
         plot_name = [data(p).name, ' ',q(:,:,s)];
         show_ave_fas(data(p).Evv_aves(s,:), data(p).Evv_stds(s,:), data(p).mag, data(p).roi_masks, plot_name)
         %exportgraphics(gcf,[plot_name,' ave in ROI.png'])
     end
 end
 
-%% show fas on magnitude image
+%% show fas colormaps
 for p = 1:length(data)
     for s = 1:2
         for v = 1:3
-            show_fas_colormaps(data(p).Evv{s,v}, data(p).mag, data(p).mg_masks)
-            exportgraphics(gcf,['colormap ',data(p).name,' ',q(:,:,s),' proj on EV',num2str(v),'.png'])
+            show_fas_colormaps(data(p).Evv{s,v}, data(p).mg_masks)
+            plot_name = ['colormaps ',data(p).name,' ',q(:,:,s),' proj on EV',num2str(v)];
+            exportgraphics(gcf,[plot_name,'.png'])
             close
         end
     end
 end
-
-
