@@ -92,13 +92,20 @@ for p = 2%1:length(data)
 end
 
 %% show fas colormaps
-for p = 1:length(data)
-    for s = 1:2
-        for v = 1:3
-            show_fas_colormaps(data(p).Evv{s,v}, data(p).mg_masks)
-            plot_name = ['colormaps ',data(p).name,' ',q(:,:,s),' proj on EV',num2str(v)];
-            exportgraphics(gcf,[plot_name,'.png'])
-            close
+for p = 2%1:length(data)
+    for s = 1%1:2
+        if s == 1
+            color_limits = [-0.3 0.3];
+        elseif s == 2
+            color_limits = [-500 500];
+        end
+        
+        for v = 2%1:3
+            show_fas_colormaps(data(p).Evv{s,v}, data(p).mag, data(p).mg_masks)
+            plot_name = ['fiber aligned colormaps ',data(p).name,' ',q(:,:,s),' proj on EV',num2str(v)];
+            caxis(color_limits)
+%             exportgraphics(gcf,[plot_name,'.png'])
+%             close
         end
     end
 end
