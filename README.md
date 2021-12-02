@@ -26,4 +26,4 @@ I also calculated the average aligned strains within an ROI for each temporal fr
 Working with large matrices as inputs and outputs improved my ability to organize data into structures, select relevant voxels using masks, and utilize different MATLAB image representation methods (truecolor vs indexed) to display results. This work showed general alignment between the secondary and tertiary DTI eigenvectors (which have unknown anatomical correspondence in skeletal muscle) and that of strain, hinting at a potential structure-function relationship. In addition, it demonstrated that older subjects experience decreased strain compared to young subjects for the same level of relative exertion.
 
 ![Table 1](images/Table 1. Peak average Evv in ROI.PNG)
-> *Table 1. Results of strain and strain rate projection on DTI eigenvectors for young and senior subject. *
+> *Table 1. Results of strain and strain rate projection on DTI eigenvectors for young and senior subject.*
