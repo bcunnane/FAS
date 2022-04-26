@@ -1,5 +1,7 @@
-function [roi_aves, roi_stds] = get_ave_fas(Evv, masks)
+function [roi_aves, roi_stds] = get_roi_fas(Evv, rois)
 % computes average and standard dev fiber aligned strain in ROI region
+
+masks = roi_to_mask(rois, size(Evv,1));
 
 % get mean and std data
 for fr = size(Evv,3):-1:1

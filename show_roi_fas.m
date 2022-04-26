@@ -1,7 +1,7 @@
 function show_roi_fas(D)
 % creates plots of average strain in ROI with standard dev error bars
 
-figure
+figure('WindowState','maximized')
 tiledlayout(3,6,'TileSpacing','compact');
 
 for n = 1:length(D)
@@ -36,6 +36,6 @@ for n = 1:length(D)
         end
     end
 end
-sgtitle([D(1).age,' ',D(1).name(1:end-7)])
+sgtitle([D(1).age,' ',D(1).name(1:end-7)],'Interpreter', 'none')
 
 end

@@ -11,8 +11,7 @@ for n = length(data):-1:1
         for v = 3:-1:1
             dti = squeeze(data(n).dti(:,:,:,v));
             for fr = 17:-1:1
-                T = squeeze(data(n).T{s}(:,:,fr,:,:));
-                Evv(:,:,fr) = get_fas(T, dti);
+                Evv(:,:,fr) = get_fas(squeeze(data(n).str{s}(:,:,fr,:,:)), dti);
             end
             data(n).Evv{s,v} = Evv;
         end
@@ -25,7 +24,7 @@ for n = length(data):-1:1
     for s = 2:-1:1
         for v = 3:-1:1
             % calculate average & std FAS in ROI
-            [Evv_aves, Evv_stds] = get_roi_fas(data(n).Evv{s,v}, data(n).roi);
+            [Evv_aves, Evv_stds] = get_roi_fas(data(n).Evv{s,v}, data(n).sq);
             data(n).Evv_aves{s,v} = Evv_aves;
             data(n).Evv_stds{s,v} = Evv_stds;
             
@@ -40,8 +39,15 @@ end
 
 %% display results
 for n = 1%:3:length(data)
-    show_roi_fas(data(n:n+2))
-    show_fas_colormaps(data(n:n+2))
+%     % make ROI result plots
+%     show_roi_fas(data(n:n+2))
+%     exportgraphics(gcf,[data(n).age,' ',data(n).name(1:end-7),' ROI plots.png'])
+%     close
+    
+    % make colormap results
+%     show_fas_colormaps(data(n:n+2))
+%     exportgraphics(gcf,[data(n).age,' ',data(n).name(1:end-7),' colormaps.png'])
+%     close
 end
 
 %% create table

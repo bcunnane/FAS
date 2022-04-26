@@ -2,6 +2,8 @@ function show_fas_colormaps(D)
 % displays 3x6 montage of Fiber Aligned strain and strain rate as 
 % colormap overlaid on magnitude images
 
+all_masks = roi_to_mask(D(1).mg, size(D(1).m,1));
+
 figure
 tiledlayout(1,2,'TileSpacing','compact');
 for s = 1:2
@@ -10,7 +12,7 @@ for s = 1:2
         plot_title = 'Strain';
         color_limits = [-0.3 0.3];
     elseif s == 2
-        plot_title = 'Strain Rate';
+        plot_title = 'Strain Rate [s^-^1]';
         color_limits = [-500 500];
     end
     
@@ -25,7 +27,7 @@ for s = 1:2
         end
         
         % get mask & magnitude images
-        mask = cat(3,mask,repmat(D(n).mg(:,:,D(n).peak_fr),[1,3]));
+        mask = cat(3,mask,repmat(all_masks(:,:,D(n).peak_fr),[1,3]));
         mag = cat(3,mag,repmat(D(n).m(:,:,D(n).peak_fr),[1,3]));
     end
     
@@ -50,6 +52,6 @@ for s = 1:2
     title(plot_title)
     
 end
-sgtitle([D(1).age,' ',D(1).name(1:end-7)])
+sgtitle([D(1).age,' ',D(1).name(1:end-7)],'Interpreter', 'none')
 
 end
